@@ -1,4 +1,4 @@
-// Can be used as point or as vector
+// Можно использовать как точку, а можно как вектор
 function Point(in_x, in_y) {
     if ((in_x === undefined) || (in_y === undefined)) {
         this.x = 0;
@@ -64,6 +64,8 @@ function Unit(in_x, in_y) {
     self.step = 1;
     self.color = 0xFF0000;
     self.radius = 50;
+    // Нужно чтобы не делать очень маленькие
+    // и бесплезные осциллирующие шаги, если юнит уже и так близко к цели.
     self.epsilon = self.step;
     self.is_active = false;
 
