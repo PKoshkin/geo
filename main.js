@@ -140,7 +140,7 @@ var controller = {
             }
         }
 
-        // При ЛКМ меняем направление движения Unit'ов из model.active_units
+        // При нажатии ПКМ меняем направление движения Unit'ов из model.active_units
         application.view.oncontextmenu = function(event) {
             for (var i = 0; i < model.active_units.length; ++i) {
                 model.active_units[i].direction_point.x = event.clientX;
@@ -150,12 +150,13 @@ var controller = {
         };
 
         // Надо забиндить все юниты на callback после клика
+        // (а может там еще какие действия потом придумаются)
         for (var i = 0; i < model.units.length; ++i) {
             controller.bind_unit(model.units[i]);
         }
     },
-    // callback после клика по каждому юниту.
-    // Делает активным юнит, покоторому кликнули, остальные становятся неактивными.
+    // callback после клика ЛКМ по каждому юниту.
+    // Делает активным юнит, по которому кликнули, остальные становятся неактивными.
     // Для использование надо забиндить this на конкретный Unit
     click_callback: function() {
         model.active_units = [this];
