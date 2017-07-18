@@ -20,6 +20,25 @@ var model = {
         var new_obstacle = new Obstacle(100, 100, 300, 300);
         model.map.obstacles.push(new_obstacle);
         model.draw_map();
+
+        var unit_1 = new Unit(700, 100);
+        model.add_unit(unit_1);
+        var unit_2 = new Unit(1000, 100);
+        model.add_unit(unit_2);
+        var unit_3 = new Unit(1300, 100);
+        model.add_unit(unit_3);
+        var unit_4 = new Unit(700, 300);
+        model.add_unit(unit_4);
+        var unit_5 = new Unit(1000, 300);
+        model.add_unit(unit_5);
+        var unit_6 = new Unit(1300, 300);
+        model.add_unit(unit_6);
+        var unit_7 = new Unit(700, 500);
+        model.add_unit(unit_7);
+        var unit_8 = new Unit(1000, 500);
+        model.add_unit(unit_8);
+        var unit_9 = new Unit(1300, 500);
+        model.add_unit(unit_9);
     },
     draw_map: function() {
         for (var i = 0; i < model.map.obstacles.length; ++i) {
@@ -27,27 +46,16 @@ var model = {
         }
     },
     add_unit: function(unit) {
+        unit.redraw();
+        model.units.push(unit);
         controller.bind_unit(unit);
         application.stage.addChild(unit.pixi_graphics);
-        model.units.push(unit);
     },
     set_active: function(unit, is_active) {
         unit.is_active = is_active;
         unit.redraw();
         controller.bind_unit(unit);
         application.stage.addChild(unit.pixi_graphics);
-    },
-    in_activating_rect: function(point, cursor_event) {
-        var left_x = Math.min(model.right_click_point.x, cursor_event.clientX);
-        var right_x = Math.max(model.right_click_point.x, cursor_event.clientX);
-        var left_y = Math.min(model.right_click_point.y, cursor_event.clientY);
-        var right_y = Math.max(model.right_click_point.y, cursor_event.clientY);
-        return (
-            (left_x <= point.x) &&
-            (point.x <= right_x) &&
-            (left_y <= point.y) &&
-            (point.y <= right_y)
-        );
     }
 }
 
@@ -79,11 +87,11 @@ var controller = {
         application.view.onmouseup = function(event) {
             if ((event.buttons == 0) && (model.right_click_point !== undefined)) {
                 if (model.activating_rect !== undefined) {
-                    // Все кнопки отпустили, но точка захватывающего прямоугольника еще есть.
+                    // Все кнопки отпустили, но точка захватывающего прямоугольника и сам прямоугольник еще есть.
                     // Проверяем, что внутри прямоугольника есть хоть один юнит
                     var have_active_unit = false;
                     for (var i = 0; i < model.units.length; ++i) {
-                        if (model.in_activating_rect(model.units[i].current_point, event)) {
+                        if (model.activating_rect.containsPoint(model.units[i].current_point)) {
                             have_active_unit = true;
                             break;
                         }
@@ -92,7 +100,7 @@ var controller = {
                     if (have_active_unit) {
                         model.active_units = [];
                         for (var i = 0; i < model.units.length; ++i) {
-                            if (model.in_activating_rect(model.units[i].current_point, event)) {
+                            if (model.activating_rect.containsPoint(model.units[i].current_point)) {
                                 model.set_active(model.units[i], true);
                                 model.active_units.push(model.units[i]);
                             } else {
@@ -114,6 +122,7 @@ var controller = {
             // При движении мыши при зажатой ЛКМ надо перерисовать выделяющий прямоугольник
             // Тут все работает плохо! Удаляется старый прямоугольник и создается новый.
             // Хотелось бы менять параметры старого, но пока не получилось так сделать.
+            // PIXI.Graphics.setTransform работает на красиво. Рамки прямоугольника рисуются странно.
             if (model.right_click_point !== undefined) {
                 if (model.activating_rect !== undefined) {
                     model.activating_rect.destroy();

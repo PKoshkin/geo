@@ -75,17 +75,17 @@ function Unit(in_x, in_y) {
         }
         self.pixi_graphics = new PIXI.Graphics(); // Создаем новый графический элемент
         if (self.is_active) {
-            self.pixi_graphics.lineStyle(5, 0x000000, 1);
+            self.pixi_graphics.lineStyle(5, 0x000000, 1); // Рисуем с рамкой
         } else {
             self.pixi_graphics.lineStyle(0); // Начинаем рисовать без рамки
         }
-        self.pixi_graphics.beginFill(self.color, 1); // Задаем цвет заполнения
-        self.pixi_graphics.drawCircle(self.current_point.x, self.current_point.y, self.radius); // Рисуем кружок, ведь он наш дружок
+        self.pixi_graphics.beginFill(self.color, 1);
+        self.pixi_graphics.drawCircle(
+            self.current_point.x, self.current_point.y, self.radius
+        );
         self.pixi_graphics.endFill(); // Закончили отрисовку
         self.pixi_graphics.interactive = true;
     };
-
-    self.redraw();
 
     // Передвигает юнит в направлении direction_point на self.step
     self.move = function() {
@@ -96,8 +96,14 @@ function Unit(in_x, in_y) {
         direction.set_length(self.step);
         self.current_point.add(direction);
 
+        /*
         self.pixi_graphics.position.x += direction.x;
         self.pixi_graphics.position.y += direction.y;
+        */
+        self.pixi_graphics.setTransform(
+            self.pixi_graphics.position.x + direction.x,
+            self.pixi_graphics.position.y + direction.y
+        );
     };
 
     self.stop = function() {
