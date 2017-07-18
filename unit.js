@@ -99,4 +99,8 @@ function Unit(in_x, in_y) {
         self.pixi_graphics.position.x += direction.x;
         self.pixi_graphics.position.y += direction.y;
     };
+
+    self.stop = function() {
+        self.direction_point.set(self.current_point);
+    }
 };

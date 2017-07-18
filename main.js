@@ -154,6 +154,16 @@ var controller = {
         for (var i = 0; i < model.units.length; ++i) {
             controller.bind_unit(model.units[i]);
         }
+
+        addEventListener('keydown', function(event) {
+            // Нажатие кнопки 's' или 'S' останавливает
+            // движене всех выделенных юнитов
+            if ((event.key == 's') || (event.key == 'S')) {
+                for (var i = 0; i < model.active_units.length; ++i) {
+                    model.active_units[i].stop();
+                }
+            }
+        });
     },
     // callback после клика ЛКМ по каждому юниту.
     // Делает активным юнит, по которому кликнули, остальные становятся неактивными.
