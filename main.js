@@ -8,6 +8,7 @@ var model = {
     active_units: [], // Эти юниты получают новое направление движения при ЛКМ
     activating_rect: undefined,
     right_click_point: undefined,
+    map: undefined,
     create_canvas: function() {
         PIXI.settings.RENDER_OPTIONS.backgroundColor = 0xFFFFFF;
         PIXI.settings.RENDER_OPTIONS.antialias = true;
@@ -15,24 +16,15 @@ var model = {
         document.body.appendChild(application.view); // Выводим его в тело страницы
     },
     init_map: function() {
-        unit_1 = new Unit(100, 100);
-        model.add_unit(unit_1);
-        unit_2 = new Unit(100, 300);
-        model.add_unit(unit_2);
-        unit_3 = new Unit(300, 300);
-        model.add_unit(unit_3);
-        unit_4 = new Unit(300, 100);
-        model.add_unit(unit_4);
-        unit_5 = new Unit(500, 100);
-        model.add_unit(unit_5);
-        unit_6 = new Unit(500, 300);
-        model.add_unit(unit_6);
-        unit_7 = new Unit(100, 500);
-        model.add_unit(unit_7);
-        unit_8 = new Unit(500, 500);
-        model.add_unit(unit_8);
-        unit_9 = new Unit(300, 500);
-        model.add_unit(unit_9);
+        model.map = new Map();
+        var new_obstacle = new Obstacle(100, 100, 300, 300);
+        model.map.obstacles.push(new_obstacle);
+        model.draw_map();
+    },
+    draw_map: function() {
+        for (var i = 0; i < model.map.obstacles.length; ++i) {
+            application.stage.addChild(model.map.obstacles[i].pixi_graphics);
+        }
     },
     add_unit: function(unit) {
         controller.bind_unit(unit);
