@@ -7,7 +7,6 @@ var model = {
     units: [],
     active_units: [], // Эти юниты получают новое направление движения при ЛКМ
     activating_rect: undefined,
-    right_click_point: undefined,
     map: undefined,
     create_canvas: function() {
         PIXI.settings.RENDER_OPTIONS.backgroundColor = 0xFFFFFF;
@@ -42,20 +41,20 @@ var model = {
     },
     draw_map: function() {
         for (var i = 0; i < model.map.obstacles.length; ++i) {
-            application.stage.addChild(model.map.obstacles[i].pixi_graphics);
+            application.stage.addChild(model.map.obstacles[i].graphics);
         }
     },
     add_unit: function(unit) {
         unit.redraw();
-        model.units.push(unit);
         controller.bind_unit(unit);
-        application.stage.addChild(unit.pixi_graphics);
+        application.stage.addChild(unit.graphics);
+        model.units.push(unit);
     },
     set_active: function(unit, is_active) {
         unit.is_active = is_active;
         unit.redraw();
         controller.bind_unit(unit);
-        application.stage.addChild(unit.pixi_graphics);
+        application.stage.addChild(unit.graphics);
     }
 }
 
@@ -69,6 +68,14 @@ var view = {
         application.ticker.add(function() {
             for (var i = 0; i < model.units.length; ++i) {
                 model.units[i].move();
+                /*
+                for (var j = 0; j < model.map.obstacles.length; ++j) {
+                    if (intersects(model.units[i].graphics, model.map.obstacles[j].graphics)) {
+                        model.units[i].move_back();
+                        break;
+                    }
+                }
+                */
             }
         });
     }
@@ -80,41 +87,43 @@ var controller = {
         application.view.onmousedown = function(event) {
             // Нажата ЛКМ. Создам точку начала выделяющиего прямоугольника.
             if (event.buttons == 1) {
-                model.right_click_point = new Point(event.clientX, event.clientY);
+                model.activating_rect = new PIXI.Graphics();
+                model.activating_rect.lineStyle(2, 0x003300, 0.3);
+                model.activating_rect.beginFill(0x005500, 0.3);
+                model.activating_rect.drawRect(0, 0, 0, 0);
+                model.activating_rect.setTransform(event.clientX, event.clientY);
+                model.activating_rect.endFill();
+                application.stage.addChild(model.activating_rect);
             }
         };
 
         application.view.onmouseup = function(event) {
-            if ((event.buttons == 0) && (model.right_click_point !== undefined)) {
-                if (model.activating_rect !== undefined) {
-                    // Все кнопки отпустили, но точка захватывающего прямоугольника и сам прямоугольник еще есть.
-                    // Проверяем, что внутри прямоугольника есть хоть один юнит
-                    var have_active_unit = false;
-                    for (var i = 0; i < model.units.length; ++i) {
-                        if (model.activating_rect.containsPoint(model.units[i].current_point)) {
-                            have_active_unit = true;
-                            break;
-                        }
+            if ((event.buttons == 0) && (model.activating_rect !== undefined)) {
+                // Все кнопки отпустили, но точка захватывающего прямоугольника и сам прямоугольник еще есть.
+                // Проверяем, что внутри прямоугольника есть хоть один юнит
+                var have_active_unit = false;
+                for (var i = 0; i < model.units.length; ++i) {
+                    if (model.activating_rect.containsPoint(model.units[i].graphics.position)) {
+                        have_active_unit = true;
+                        break;
                     }
-                    // Сделаем активными все юниты внутри activating_rect, а остальные неактивными
-                    if (have_active_unit) {
-                        model.active_units = [];
-                        for (var i = 0; i < model.units.length; ++i) {
-                            if (model.activating_rect.containsPoint(model.units[i].current_point)) {
-                                model.set_active(model.units[i], true);
-                                model.active_units.push(model.units[i]);
-                            } else {
-                                model.set_active(model.units[i], false);
-                            }
-                        }
-                    }
-
-                    // Теперь очищаем activating_rect 
-                    model.activating_rect.destroy();
-                    model.activating_rect = undefined;
                 }
-                // Очищаем right_click_point
-                model.right_click_point = undefined;
+                // Сделаем активными все юниты внутри activating_rect, а остальные неактивными
+                if (have_active_unit) {
+                    model.active_units = [];
+                    for (var i = 0; i < model.units.length; ++i) {
+                        if (model.activating_rect.containsPoint(model.units[i].graphics.position)) {
+                            model.set_active(model.units[i], true);
+                            model.active_units.push(model.units[i]);
+                        } else {
+                            model.set_active(model.units[i], false);
+                        }
+                    }
+                }
+
+                // Теперь очищаем activating_rect 
+                model.activating_rect.destroy();
+                model.activating_rect = undefined;
             }
         };
 
@@ -123,19 +132,20 @@ var controller = {
             // Тут все работает плохо! Удаляется старый прямоугольник и создается новый.
             // Хотелось бы менять параметры старого, но пока не получилось так сделать.
             // PIXI.Graphics.setTransform работает на красиво. Рамки прямоугольника рисуются странно.
-            if (model.right_click_point !== undefined) {
-                if (model.activating_rect !== undefined) {
-                    model.activating_rect.destroy();
-                }
+            if (model.activating_rect !== undefined) {
+                var x = model.activating_rect.x;
+                var y = model.activating_rect.y;
+                model.activating_rect.destroy();
                 model.activating_rect = new PIXI.Graphics();
                 model.activating_rect.lineStyle(2, 0x003300, 0.3);
                 model.activating_rect.beginFill(0x005500, 0.3);
                 model.activating_rect.drawRect(
-                    model.right_click_point.x,
-                    model.right_click_point.y,
-                    event.clientX - model.right_click_point.x,
-                    event.clientY - model.right_click_point.y
+                    0,
+                    0,
+                    event.clientX - x,
+                    event.clientY - y
                 );
+                model.activating_rect.setTransform(x, y);
                 model.activating_rect.endFill();
                 application.stage.addChild(model.activating_rect);
             }
@@ -177,7 +187,7 @@ var controller = {
         model.set_active(this, true);
     },
     bind_unit: function(unit) {
-        unit.pixi_graphics.on('click', controller.click_callback.bind(unit));
+        unit.graphics.on('click', controller.click_callback.bind(unit));
     }
 }
 

@@ -1,19 +1,15 @@
-function Obstacle(in_x, in_y, in_height, in_width) {
+function Obstacle(in_x, in_y, in_width, in_height) {
     var self = this;
-    self.x = in_x;
-    self.y = in_y;
-    self.height = in_height;
-    self.width = in_width;
     self.color = 0x0000FF;
 
     self.redraw = function() {
-        if (self.pixi_graphics !== undefined) {
-            self.pixi_graphics.destroy();
+        if (self.graphics !== undefined) {
+            self.graphics.destroy();
         }
-        self.pixi_graphics = new PIXI.Graphics(); // Создаем новый графический элемент
-        self.pixi_graphics.beginFill(self.color, 1); // Задаем цвет заполнения
-        self.pixi_graphics.drawRect(self.x, self.y, self.width, self.width); // Рисуем прямоугольник
-        self.pixi_graphics.endFill(); // Закончили отрисовку
+        self.graphics = new PIXI.Graphics(); // Создаем новый графический элемент
+        self.graphics.beginFill(self.color, 1); // Задаем цвет заполнения
+        self.graphics.drawRect(in_x, in_y, in_width, in_height); // Рисуем прямоугольник
+        self.graphics.endFill(); // Закончили отрисовку
     };
     self.redraw();
 }
