@@ -44,7 +44,7 @@ function Unit(in_x, in_y) {
         self.graphics.position = sum(self.graphics.position, direction);
     };
 
-    // Передвигает юнит обрытном направлению движения направлении на self.step
+    // Передвигает юнит обратном направлению движения направлении на self.step
     // Нужно чтоб шагнуть назад, если врезались в препятствие
     self.move_back = function() {
         var direction = make_vector(self.direction_point, self.graphics.position);

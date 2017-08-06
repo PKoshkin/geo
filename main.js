@@ -7,6 +7,8 @@ var model = {
     units: [],
     active_units: [], // Эти юниты получают новое направление движения при ЛКМ
     activating_rect: undefined,
+    activating_rect_x_reflected: false,
+    activating_rect_y_reflected: false,
     map: undefined,
     create_canvas: function() {
         PIXI.settings.RENDER_OPTIONS.backgroundColor = 0xFFFFFF;
@@ -103,7 +105,13 @@ var controller = {
                 // Проверяем, что внутри прямоугольника есть хоть один юнит
                 var have_active_unit = false;
                 for (var i = 0; i < model.units.length; ++i) {
-                    if (model.activating_rect.containsPoint(model.units[i].graphics.position)) {
+                    var rectangle_contains_point = rect_contains_point(
+                            model.activating_rect,
+                            model.units[i].graphics.position,
+                            model.activating_rect_x_reflected,
+                            model.activating_rect_y_reflected
+                    );
+                    if (rectangle_contains_point) {
                         have_active_unit = true;
                         break;
                     }
@@ -112,7 +120,13 @@ var controller = {
                 if (have_active_unit) {
                     model.active_units = [];
                     for (var i = 0; i < model.units.length; ++i) {
-                        if (model.activating_rect.containsPoint(model.units[i].graphics.position)) {
+                        var rectangle_contains_point = rect_contains_point(
+                                model.activating_rect,
+                                model.units[i].graphics.position,
+                                model.activating_rect_x_reflected,
+                                model.activating_rect_y_reflected
+                        );
+                        if (rectangle_contains_point) {
                             model.set_active(model.units[i], true);
                             model.active_units.push(model.units[i]);
                         } else {
@@ -146,6 +160,8 @@ var controller = {
                     event.clientY - y
                 );
                 model.activating_rect.setTransform(x, y);
+                model.activating_rect_x_reflected = ((event.clientX - x) < 0);
+                model.activating_rect_y_reflected = ((event.clientY - y) < 0);
                 model.activating_rect.endFill();
                 application.stage.addChild(model.activating_rect);
             }
@@ -173,6 +189,11 @@ var controller = {
                 for (var i = 0; i < model.active_units.length; ++i) {
                     model.active_units[i].stop();
                 }
+            }
+
+            // Клавиша для выведения нужной информации в консоль
+            if ((event.key == 'l') || (event.key == 'L')) {
+                console.log(model.activating_rect.x, model.activating_rect.width, model.activating_rect.y, model.activating_rect.height, model.activating_rect.scale.x);
             }
         });
     },

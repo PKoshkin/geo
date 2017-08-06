@@ -62,12 +62,8 @@ function get_angles(rectangle) {
 
 function intersects(graphics_1, graphics_2) {
     if (is_circle(graphics_1) && is_circle(graphics_2)) {
-        //console.log('circle and circle intersect test');
         return (distance(graphics_1.position, graphics_2.position) < (graphics_1.radius + graphics_2.radius));
     } else if ((is_circle(graphics_1) && is_rectangle(graphics_2)) || (is_circle(graphics_2) && is_rectangle(graphics_1))) {
-
-        //console.log('rect and circle intersect test');
-
         var circle, rectangle;
         if (is_circle(graphics_1)) {
             circle = graphics_1;
@@ -98,6 +94,36 @@ function intersects(graphics_1, graphics_2) {
             (y_rect.contains(circle.position.x, circle.position.y))
         );
     } else {
-        //console.log('unknown intersect test');
+        console.log('unknown intersect test');
     }
+}
+
+
+// PIXI.Graphics.containsPoint криво работает
+// с прямоугольниками с отрицательными width и height
+// (а точнее не работает)
+// Мой вариант довольно отвратителен, но работает.
+// Для этого он получает флаги, сообщающие отрицательны ли ширина и высота прямоугольника
+function rect_contains_point(rect, point, rect_x_reflected, rect_y_reflected) {
+    var min_x, min_y, max_x, max_y;
+    if (rect_x_reflected) {
+        min_x = model.activating_rect.x - model.activating_rect.width;
+        max_x = model.activating_rect.x;
+    } else {
+        min_x = model.activating_rect.x;
+        max_x = model.activating_rect.x + model.activating_rect.width;
+    }
+    if (rect_y_reflected) {
+        min_y = model.activating_rect.y - model.activating_rect.height;
+        max_y = model.activating_rect.y;
+    } else {
+        min_y = model.activating_rect.y;
+        max_y = model.activating_rect.y + model.activating_rect.height;
+    }
+    return (
+        (min_x <= point.x) &&
+        (point.x <= max_x) &&
+        (min_y <= point.y) &&
+        (point.y <= max_y)
+    );
 }
