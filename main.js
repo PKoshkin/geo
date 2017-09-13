@@ -18,7 +18,14 @@ var model = {
     },
     init_map: function() {
         model.map = new Map();
-        var new_obstacle = new Obstacle(100, 100, 300, 300);
+        var new_obstacle = new Obstacle([
+            new PIXI.Point(100, 400),
+            new PIXI.Point(150, 350),
+            new PIXI.Point(200, 320),
+            new PIXI.Point(250, 370),
+            new PIXI.Point(300, 420),
+            new PIXI.Point(200, 600)
+        ]);
         model.map.obstacles.push(new_obstacle);
         model.draw_map();
 
@@ -70,14 +77,13 @@ var view = {
         application.ticker.add(function() {
             for (var i = 0; i < model.units.length; ++i) {
                 model.units[i].move();
-                /*
                 for (var j = 0; j < model.map.obstacles.length; ++j) {
+                    // Долбимся головой об стену, пока она не уберется с пути.
                     if (intersects(model.units[i].graphics, model.map.obstacles[j].graphics)) {
                         model.units[i].move_back();
                         break;
                     }
                 }
-                */
             }
         });
     }
@@ -189,11 +195,6 @@ var controller = {
                 for (var i = 0; i < model.active_units.length; ++i) {
                     model.active_units[i].stop();
                 }
-            }
-
-            // Клавиша для выведения нужной информации в консоль
-            if ((event.key == 'l') || (event.key == 'L')) {
-                console.log(model.activating_rect.x, model.activating_rect.width, model.activating_rect.y, model.activating_rect.height, model.activating_rect.scale.x);
             }
         });
     },

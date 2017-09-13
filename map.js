@@ -1,4 +1,4 @@
-function Obstacle(in_x, in_y, in_width, in_height) {
+function Obstacle(path) {
     var self = this;
     self.color = 0x0000FF;
 
@@ -8,7 +8,7 @@ function Obstacle(in_x, in_y, in_width, in_height) {
         }
         self.graphics = new PIXI.Graphics(); // Создаем новый графический элемент
         self.graphics.beginFill(self.color, 1); // Задаем цвет заполнения
-        self.graphics.drawRect(in_x, in_y, in_width, in_height); // Рисуем прямоугольник
+        self.graphics.drawPolygon(path); // Рисуем прямоугольник
         self.graphics.endFill(); // Закончили отрисовку
     };
     self.redraw();

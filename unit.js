@@ -1,7 +1,7 @@
 function Unit(in_x, in_y) {
     var self = this;
     self.direction_point = new PIXI.Point(in_x, in_y);
-    self.step = 1;
+    self.step = 5;
     self.color = 0xFF0000;
     self.radius = 50;
     // Нужно чтобы не делать очень маленькие
