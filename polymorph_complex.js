@@ -78,7 +78,7 @@ function polymorph() {
 			if(... && props[this].toString().indexOf('.__base') > -1)
 			Should not harm anything
 			*/
-			this.__base;
+			//this.__base;
 		}
 		var flag = true;
 		for(var i in funcmap) {

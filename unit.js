@@ -1,13 +1,35 @@
 function Unit(in_x, in_y) {
     var self = this;
     self.direction_point = new PIXI.Point(in_x, in_y);
-    self.step = 5;
     self.color = 0xFF0000;
     self.radius = 50;
     // Нужно чтобы не делать очень маленькие
     // и бесплезные осциллирующие шаги, если юнит уже и так близко к цели.
-    self.epsilon = self.step;
+    self.epsilon = 5;
+    self.velocity_epsilon = 0.5;
     self.is_active = false;
+    self.mass = 1;
+    self.velocity = new PIXI.Point(0, 0); // Скорость не связанная с движением в сторону цели. Уменьшается силой сопротивления.
+    self.direction_velocity_module = 5; // Модуль скорости в сторону точки назначения
+    self.resistance = 0.05; // Во сколько уменьшается скорость из-за сопротивления.
+
+    self.get_position = function() {
+        return self.graphics.position;
+    }
+
+    self.get_radius = function() {
+        return self.graphics.graphicsData[0].shape.radius;
+    }
+
+    self.get_direction_velocity = function() {
+        if (distance(self.graphics.position, self.direction_point) > self.epsilon) {
+            var direction_velocity = make_vector(self.get_position(), self.direction_point);
+            set_length(direction_velocity, self.direction_velocity_module);
+        } else {
+            var direction_velocity = new PIXI.Point(0, 0);
+        }
+        return direction_velocity;
+    }
 
     self.redraw = function() {
         var x, y;
@@ -34,25 +56,32 @@ function Unit(in_x, in_y) {
         self.graphics.interactive = true;
     };
 
-    // Передвигает юнит в направлении direction_point на self.step
+    // Передвигает юнит в соответствии с импульсом и силами, действующими на него
     self.move = function() {
-        if (distance(self.graphics.position, self.direction_point) < self.epsilon) {
-            return;
+        // Сначала сила сопротивления
+        if (get_length(self.velocity) > self.velocity_epsilon) {
+            self.velocity = get_multiplied(self.velocity, 1 - self.resistance);
+        } else {
+            self.velocity = new PIXI.Point(0, 0);
         }
-        var direction = make_vector(self.graphics.position, self.direction_point);
-        set_length(direction, self.step);
-        self.graphics.position = sum(self.graphics.position, direction);
+
+        self.graphics.position = sum(self.graphics.position, sum(self.velocity, self.get_direction_velocity()));
     };
 
-    // Передвигает юнит обратном направлению движения направлении на self.step
-    // Нужно чтоб шагнуть назад, если врезались в препятствие
-    self.move_back = function() {
-        var direction = make_vector(self.direction_point, self.graphics.position);
-        set_length(direction, self.step);
-        self.graphics.position = sum(self.graphics.position, direction);
-    };
+    self.get_momentum = function() {
+        return get_multiplied(sum(self.velocity, self.get_direction_velocity()), self.mass);
+    }
+
+    self.take_momentum = function(momentum) {
+        self.velocity = sum(self.velocity, get_multiplied(momentum, 1 / self.mass));
+    }
 
     self.stop = function() {
         self.direction_point.copy(self.graphics.position);
     }
 };
+
+
+function touches(unit_1, unit_2) {
+    return (distance(unit_1.get_position(), unit_2.get_position()) <= (unit_1.radius + unit_2.radius));
+}

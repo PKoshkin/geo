@@ -76,14 +76,32 @@ var view = {
 
         application.ticker.add(function() {
             for (var i = 0; i < model.units.length; ++i) {
-                model.units[i].move();
+                /*
+                for (var j = 0; j < model.units.length; ++j) {
+                    if (i >= j) {
+                        continue;
+                    }
+                    if (touches(model.units[i], model.units[j])) {
+                        model.units[i].take_momentum(get_projected(
+                            model.units[j].get_momentum(),
+                            make_vector(model.units[j].get_position(), model.units[i].get_position())
+                        ));
+                        model.units[j].take_momentum(get_projected(
+                            model.units[i].get_momentum(),
+                            make_vector(model.units[i].get_position(), model.units[j].get_position())
+                        ));
+                    }
+                }
+                */
+
                 for (var j = 0; j < model.map.obstacles.length; ++j) {
                     // Долбимся головой об стену, пока она не уберется с пути.
                     if (intersects(model.units[i].graphics, model.map.obstacles[j].graphics)) {
-                        model.units[i].move_back();
+                        model.units[i].take_momentum(get_multiplied(model.units[i].get_momentum(), -2));
                         break;
                     }
                 }
+                model.units[i].move();
             }
         });
     }

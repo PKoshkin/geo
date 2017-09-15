@@ -40,12 +40,25 @@ function get_angle_cos(vector_1, vector_2) {
 }
 
 
-function sum(vector_1, vector_2) {
-    return new PIXI.Point(
-        vector_1.x + vector_2.x,
-        vector_1.y + vector_2.y
-    );
-}
+var sum = polymorph(
+    function sum(vector_1, vector_2) {
+        return new PIXI.Point(
+            vector_1.x + vector_2.x,
+            vector_1.y + vector_2.y
+        );
+    },
+    function sum(vectors) {
+        if (vectors.length != 0) {
+            var result = vectors[0];
+            for (var i = 1; i < vectors.length; ++i) {
+                result = sum(result, vectors[i]);
+            }
+            return result;
+        } else {
+            throw Error('Empty vectors array');
+        }
+    }
+);
 
 
 function get_length(vector) {
@@ -64,6 +77,14 @@ function set_length(vector, length) {
     normalize(vector);
     vector.x *= length;
     vector.y *= length;
+}
+
+
+function get_multiplied(vector, alpha) {
+    return new PIXI.Point(
+        vector.x * alpha,
+        vector.y * alpha
+    );
 }
 
 
@@ -111,6 +132,13 @@ function get_projection(vector_begin, vector_end, point) {
     var length = get_length(vector_to_point) * get_angle_cos(vector_to_point, vector);
     set_length(vector, length);
     return new PIXI.Point(vector_begin.x + vector.x, vector_begin.y + vector.y);
+}
+
+
+function get_projected(vector, direction) {
+    var result = direction.clone();
+    set_length(result, get_length(vector) * get_angle_cos(vector, direction));
+    return result;
 }
 
 
