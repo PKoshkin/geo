@@ -7,17 +7,7 @@ var distance = polymorph(
 
     // Расстояние от точки до отрезка
     function(begin_point, end_point, point) {
-        var projection = get_projection(begin_point, end_point, point);
-        var vector_1 = make_vector(projection, begin_point);
-        var vector_2 = make_vector(projection, end_point);
-        if (scalar_product(vector_1, vector_2) < 0) {
-            return distance(point, projection);
-        } else {
-            return Math.min(
-                distance(point, begin_point),
-                distance(point, end_point)
-            );
-        }
+        return distance(point, get_closets_point(begin_point, end_point, point));
     }
 )
 
@@ -98,29 +88,10 @@ function get_polygon_point(path, i) {
 // Проверяет, пересекается ли граница полигона с кругом
 function intersects(circle, polygon) {
     // Для начала надо найти ближайшую к точке центра круга точку на границе полигона
-    var center = new PIXI.Point(circle.x, circle.y);
+    var closest_point = get_closets_point(circle, polygon);
     var radius = circle.graphicsData[0].shape.radius;
-    var path = polygon.graphicsData[0].shape.points;
-    var min_distance = distance(
-        get_polygon_point(path, 0),
-        get_polygon_point(path, 1),
-        center
-    );
-    var i = 1, j = 2;
-    var points_number = Math.round(path.length / 2);
-    while (i < points_number) {
-        var ij_distance = distance(
-            get_polygon_point(path, i),
-            get_polygon_point(path, j),
-            center
-        );
-        if (ij_distance < min_distance) {
-            min_distance = ij_distance;
-        }
-        ++i;
-        j = (j + 1) % points_number;
-    }
-    return (min_distance < radius);
+    var center = new PIXI.Point(circle.x, circle.y);
+    return (distance(closest_point, center) < radius);
 }
 
 
@@ -135,10 +106,59 @@ function get_projection(vector_begin, vector_end, point) {
 }
 
 
-function get_projected(vector, direction) {
-    var result = direction.clone();
-    set_length(result, get_length(vector) * get_angle_cos(vector, direction));
-    return result;
+var get_closets_point = polymorph(
+    // Ближайшая к точке точка на отрезке
+    function(begin_point, end_point, point) {
+        var projection = get_projection(begin_point, end_point, point);
+        var vector_1 = make_vector(projection, begin_point);
+        var vector_2 = make_vector(projection, end_point);
+        if (scalar_product(vector_1, vector_2) < 0) {
+            return projection;
+        } else if (distance(point, begin_point) < distance(point, end_point)) {
+            return begin_point;
+        } else {
+            return end_point;
+        }
+    },
+
+    function(circle, polygon) {
+        // Для начала надо найти ближайшую к точке центра круга точку на границе полигона
+        var center = new PIXI.Point(circle.x, circle.y);
+        var path = polygon.graphicsData[0].shape.points;
+        var closest_point = get_closets_point(
+            get_polygon_point(path, 0),
+            get_polygon_point(path, 1),
+            center
+        )
+        var i = 1, j = 2;
+        var points_number = Math.round(path.length / 2);
+        while (i < points_number) {
+            var ij_closets_point = get_closets_point(
+                get_polygon_point(path, i),
+                get_polygon_point(path, j),
+                center
+            );
+            if (distance(ij_closets_point, center) < distance(closest_point, center)) {
+                closest_point = ij_closets_point;
+            }
+            ++i;
+            j = (j + 1) % points_number;
+        }
+        return closest_point
+    }
+);
+
+
+function get_projected_length(vector, direction) {
+    return get_length(vector) * get_angle_cos(vector, direction);
+}
+
+
+function get_reflecting_momentum(unit, polygon) {
+    var closest_point = get_closets_point(unit.graphics, polygon);
+    var reflecting_momentum = make_vector(closest_point, unit.get_position());
+    set_length(reflecting_momentum, get_projected_length(unit.velocity, reflecting_momentum) * -2);
+    return reflecting_momentum;
 }
 
 

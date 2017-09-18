@@ -5,13 +5,14 @@ function Unit(in_x, in_y) {
     self.radius = 50;
     // Нужно чтобы не делать очень маленькие
     // и бесплезные осциллирующие шаги, если юнит уже и так близко к цели.
-    self.epsilon = 5;
-    self.velocity_epsilon = 0.5;
+    self.epsilon = 2;
+    self.velocity_epsilon = 0.2;
     self.is_active = false;
     self.mass = 1;
-    self.velocity = new PIXI.Point(0, 0); // Скорость не связанная с движением в сторону цели. Уменьшается силой сопротивления.
-    self.direction_velocity_module = 5; // Модуль скорости в сторону точки назначения
-    self.resistance = 0.05; // Во сколько уменьшается скорость из-за сопротивления.
+    self.velocity = new PIXI.Point(0, 0); // Скорость
+    self.direction_force_module = 0.5; // Модуль скорости в сторону точки назначения
+    self.resistance_coefficient = 0.1; // Коэффициент сопротивления
+    self.forces = [];
 
     self.get_position = function() {
         return self.graphics.position;
@@ -21,14 +22,26 @@ function Unit(in_x, in_y) {
         return self.graphics.graphicsData[0].shape.radius;
     }
 
-    self.get_direction_velocity = function() {
-        if (distance(self.graphics.position, self.direction_point) > self.epsilon) {
-            var direction_velocity = make_vector(self.get_position(), self.direction_point);
-            set_length(direction_velocity, self.direction_velocity_module);
+    self.get_direction_force = function() {
+        if (distance(self.get_position(), self.direction_point) > self.epsilon) {
+            var direction_force = make_vector(self.get_position(), self.direction_point);
+            set_length(direction_force, self.direction_force_module);
+            return direction_force;
         } else {
-            var direction_velocity = new PIXI.Point(0, 0);
+            return new PIXI.Point(0, 0);
         }
-        return direction_velocity;
+    }
+
+    self.get_resistance_force = function() {
+        if (get_length(self.velocity) > self.velocity_epsilon) {
+            var resistance_force = self.velocity.clone();
+            set_length(resistance_force, -self.resistance_coefficient * get_length(self.velocity));
+            return resistance_force;
+
+        } else {
+            self.velocity = new PIXI.Point(0, 0);
+            return new PIXI.Point(0, 0);
+        }
     }
 
     self.redraw = function() {
@@ -57,19 +70,19 @@ function Unit(in_x, in_y) {
     };
 
     // Передвигает юнит в соответствии с импульсом и силами, действующими на него
-    self.move = function() {
-        // Сначала сила сопротивления
-        if (get_length(self.velocity) > self.velocity_epsilon) {
-            self.velocity = get_multiplied(self.velocity, 1 - self.resistance);
-        } else {
-            self.velocity = new PIXI.Point(0, 0);
+    self.move = function(additional_forces) {
+        var force = sum(self.get_direction_force(), self.get_resistance_force());
+        if ((additional_forces !== undefined) && (additional_forces.length != 0)) {
+            var additional_forces_sum = sum(additional_forces);
+            force = sum(force, additional_forces_sum);
         }
-
-        self.graphics.position = sum(self.graphics.position, sum(self.velocity, self.get_direction_velocity()));
+        var acceleration = get_multiplied(force, 1 / self.mass);
+        self.velocity = sum(self.velocity, acceleration);
+        self.graphics.position = sum(self.graphics.position, self.velocity);
     };
 
     self.get_momentum = function() {
-        return get_multiplied(sum(self.velocity, self.get_direction_velocity()), self.mass);
+        return get_multiplied(self.velocity, self.mass);
     }
 
     self.take_momentum = function(momentum) {

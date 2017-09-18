@@ -76,32 +76,37 @@ var view = {
 
         application.ticker.add(function() {
             for (var i = 0; i < model.units.length; ++i) {
-                /*
+                var additional_forces = [];
                 for (var j = 0; j < model.units.length; ++j) {
                     if (i >= j) {
                         continue;
                     }
                     if (touches(model.units[i], model.units[j])) {
-                        model.units[i].take_momentum(get_projected(
-                            model.units[j].get_momentum(),
-                            make_vector(model.units[j].get_position(), model.units[i].get_position())
-                        ));
-                        model.units[j].take_momentum(get_projected(
-                            model.units[i].get_momentum(),
-                            make_vector(model.units[i].get_position(), model.units[j].get_position())
-                        ));
+                        var direction = make_vector(model.units[i].get_position(), model.units[j].get_position());
+                        normalize(direction);
+                        model.units[i].take_momentum(
+                            get_multiplied(direction, -10 * model.units[j].mass)
+                        );
+                        model.units[j].take_momentum(
+                            get_multiplied(direction, 10 * model.units[i].mass)
+                        );
                     }
                 }
-                */
 
                 for (var j = 0; j < model.map.obstacles.length; ++j) {
-                    // Долбимся головой об стену, пока она не уберется с пути.
-                    if (intersects(model.units[i].graphics, model.map.obstacles[j].graphics)) {
-                        model.units[i].take_momentum(get_multiplied(model.units[i].get_momentum(), -2));
-                        break;
+                    var closest_point = get_closets_point(model.units[i].graphics, model.map.obstacles[j].graphics);
+                    var radius = model.units[i].graphics.graphicsData[0].shape.radius;
+                    var current_distance = distance(closest_point, model.units[i].get_position());
+                    if (current_distance < radius) {
+                        model.units[i].take_momentum(get_reflecting_momentum(model.units[i], model.map.obstacles[j].graphics));
+                        var direction = make_vector(closest_point, model.units[i].get_position());
+                        normalize(direction);
+                        additional_forces.push(
+                            get_multiplied(direction, (radius - current_distance))
+                        );
                     }
                 }
-                model.units[i].move();
+                model.units[i].move(additional_forces);
             }
         });
     }
