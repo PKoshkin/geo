@@ -12,7 +12,6 @@ function Unit(in_x, in_y) {
     self.velocity = new PIXI.Point(0, 0); // Скорость
     self.direction_force_module = 0.5; // Модуль скорости в сторону точки назначения
     self.resistance_coefficient = 0.1; // Коэффициент сопротивления
-    self.forces = [];
 
     self.get_position = function() {
         return self.graphics.position;

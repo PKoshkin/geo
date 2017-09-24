@@ -30,6 +30,8 @@ var model = {
         model.draw_map();
 
         var unit_1 = new Unit(700, 100);
+        unit_1.mass = 10
+        unit_1.direction_force_module = 10;
         model.add_unit(unit_1);
         var unit_2 = new Unit(1000, 100);
         model.add_unit(unit_2);
@@ -75,8 +77,11 @@ var view = {
         controller.bind();
 
         application.ticker.add(function() {
+            var additional_forces = {};
             for (var i = 0; i < model.units.length; ++i) {
-                var additional_forces = [];
+                additional_forces[i] = [];
+            }
+            for (var i = 0; i < model.units.length; ++i) {
                 for (var j = 0; j < model.units.length; ++j) {
                     if (i >= j) {
                         continue;
@@ -84,12 +89,34 @@ var view = {
                     if (touches(model.units[i], model.units[j])) {
                         var direction = make_vector(model.units[i].get_position(), model.units[j].get_position());
                         normalize(direction);
+                        
+                        var m1 = model.units[i].mass;
+                        var m2 = model.units[j].mass;
+                        var v1 = get_projected_length(model.units[i].velocity, direction);
+                        var v2 = get_projected_length(model.units[j].velocity, direction);
+                        var p = m1 * v1 + m2 * v2;
+                        var E = m1 * v1 * v1 + m2 * v2 * v2;
+
+                        if (v2 > v1) {
+                            var v2_final = (2 * p * m2 - Math.sqrt(4 * p * p * m2 * m2 - 4 * (p * p - m1 * E) * (m2 * m2 + m2 * m1))) / (2 * (m2 * m2 + m2 * m1));
+                            var v1_final = (p - m2 * v2_final) / m1;
+                        } else {
+                            var v2_final = (2 * p * m2 + Math.sqrt(4 * p * p * m2 * m2 - 4 * (p * p - m1 * E) * (m2 * m2 + m2 * m1))) / (2 * (m2 * m2 + m2 * m1));
+                            var v1_final = (p - m2 * v2_final) / m1;
+                        }
+                        var delta_v1 = v1_final - v1;
+                        var delta_v2 = v2_final - v2;
+
                         model.units[i].take_momentum(
-                            get_multiplied(direction, -10 * model.units[j].mass)
+                            get_multiplied(direction, delta_v1 * model.units[i].mass)
                         );
                         model.units[j].take_momentum(
-                            get_multiplied(direction, 10 * model.units[i].mass)
+                            get_multiplied(direction, delta_v2 * model.units[j].mass)
                         );
+
+                        var overlapping = model.units[i].radius + model.units[j].radius - distance(model.units[i].get_position(), model.units[j].get_position());
+                        additional_forces[i].push(get_multiplied(direction, -overlapping * model.units[i].mass));
+                        additional_forces[j].push(get_multiplied(direction, overlapping * model.units[j].mass));
                     }
                 }
 
@@ -101,12 +128,12 @@ var view = {
                         model.units[i].take_momentum(get_reflecting_momentum(model.units[i], model.map.obstacles[j].graphics));
                         var direction = make_vector(closest_point, model.units[i].get_position());
                         normalize(direction);
-                        additional_forces.push(
-                            get_multiplied(direction, (radius - current_distance))
-                        );
+                        additional_forces[i].push(get_multiplied(direction, (radius - current_distance) * model.units[i].mass));
                     }
                 }
-                model.units[i].move(additional_forces);
+            }
+            for (var i = 0; i < model.units.length; ++i) {
+                model.units[i].move(additional_forces[i]);
             }
         });
     }

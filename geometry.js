@@ -150,7 +150,11 @@ var get_closets_point = polymorph(
 
 
 function get_projected_length(vector, direction) {
-    return get_length(vector) * get_angle_cos(vector, direction);
+    if (get_length(vector) == 0) {
+        return 0;
+    } else {
+        return get_length(vector) * get_angle_cos(vector, direction);
+    }
 }
 
 
