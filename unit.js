@@ -1,8 +1,7 @@
-function Unit(in_x, in_y) {
+function Unit(in_x, in_y, in_radius=50) {
     var self = this;
     self.direction_point = new PIXI.Point(in_x, in_y);
     self.color = 0xFF0000;
-    self.radius = 50;
     // Нужно чтобы не делать очень маленькие
     // и бесплезные осциллирующие шаги, если юнит уже и так близко к цели.
     self.epsilon = 2;
@@ -61,7 +60,7 @@ function Unit(in_x, in_y) {
         }
         self.graphics.beginFill(self.color, 1);
         self.graphics.drawCircle(
-            0, 0, self.radius
+            0, 0, in_radius
         );
         self.graphics.setTransform(x, y);
         self.graphics.endFill(); // Закончили отрисовку
@@ -95,5 +94,5 @@ function Unit(in_x, in_y) {
 
 
 function touches(unit_1, unit_2) {
-    return (distance(unit_1.get_position(), unit_2.get_position()) <= (unit_1.radius + unit_2.radius));
+    return (distance(unit_1.get_position(), unit_2.get_position()) <= (unit_1.get_radius() + unit_2.get_radius()));
 }

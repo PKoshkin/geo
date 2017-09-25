@@ -114,7 +114,7 @@ var view = {
                             get_multiplied(direction, delta_v2 * model.units[j].mass)
                         );
 
-                        var overlapping = model.units[i].radius + model.units[j].radius - distance(model.units[i].get_position(), model.units[j].get_position());
+                        var overlapping = model.units[i].get_radius() + model.units[j].get_radius() - distance(model.units[i].get_position(), model.units[j].get_position());
                         additional_forces[i].push(get_multiplied(direction, -overlapping * model.units[i].mass));
                         additional_forces[j].push(get_multiplied(direction, overlapping * model.units[j].mass));
                     }
@@ -122,7 +122,7 @@ var view = {
 
                 for (var j = 0; j < model.map.obstacles.length; ++j) {
                     var closest_point = get_closets_point(model.units[i].graphics, model.map.obstacles[j].graphics);
-                    var radius = model.units[i].graphics.graphicsData[0].shape.radius;
+                    var radius = model.units[i].get_radius();
                     var current_distance = distance(closest_point, model.units[i].get_position());
                     if (current_distance < radius) {
                         model.units[i].take_momentum(get_reflecting_momentum(model.units[i], model.map.obstacles[j].graphics));
