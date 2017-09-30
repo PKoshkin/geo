@@ -71,6 +71,7 @@ function Unit(in_x, in_y, in_radius=50) {
     self.move = function(additional_forces) {
         var force = sum(self.get_direction_force(), self.get_resistance_force());
         if ((additional_forces !== undefined) && (additional_forces.length != 0)) {
+            console.log(force, additional_forces)
             var additional_forces_sum = sum(additional_forces);
             force = sum(force, additional_forces_sum);
         }

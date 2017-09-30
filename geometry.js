@@ -32,6 +32,9 @@ function get_angle_cos(vector_1, vector_2) {
 
 var sum = polymorph(
     function sum(vector_1, vector_2) {
+        if ((vector_1 === undefined) || (vector_2 === undefined)) {
+            throw Error('Undefined vectors.');
+        }
         return new PIXI.Point(
             vector_1.x + vector_2.x,
             vector_1.y + vector_2.y
@@ -45,7 +48,7 @@ var sum = polymorph(
             }
             return result;
         } else {
-            throw Error('Empty vectors array');
+            throw Error('Empty vectors array.');
         }
     }
 );
@@ -161,7 +164,10 @@ function get_projected_length(vector, direction) {
 function get_reflecting_momentum(unit, polygon) {
     var closest_point = get_closets_point(unit.graphics, polygon);
     var reflecting_momentum = make_vector(closest_point, unit.get_position());
-    set_length(reflecting_momentum, get_projected_length(unit.velocity, reflecting_momentum) * -2);
+    set_length(
+        reflecting_momentum,
+        get_projected_length(unit.velocity, reflecting_momentum) * -2 * unit.mass
+    );
     return reflecting_momentum;
 }
 
