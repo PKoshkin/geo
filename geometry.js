@@ -32,23 +32,32 @@ function get_angle_cos(vector_1, vector_2) {
 
 var sum = polymorph(
     function sum(vector_1, vector_2) {
-        if ((vector_1 === undefined) || (vector_2 === undefined)) {
-            throw Error('Undefined vectors.');
+        if ((vector_1 === undefined) && (vector_2 === undefined)) {
+            console.log('Undefined vectors in sum(vector_1, vector_2).');
+            return new PIXI.Point(0, 0);
+        } else if (vector_1 === undefined) {
+            console.log('Undefined vector_1 in sum(vector_1, vector_2).');
+            return vector_2;
+        } else if (vector_2 === undefined) {
+            console.log('Undefined vector_2 in sum(vector_1, vector_2).');
+            return vector_1;
+        } else {
+            return new PIXI.Point(
+                vector_1.x + vector_2.x,
+                vector_1.y + vector_2.y
+            );
         }
-        return new PIXI.Point(
-            vector_1.x + vector_2.x,
-            vector_1.y + vector_2.y
-        );
     },
     function sum(vectors) {
-        if (vectors.length != 0) {
+        if ((vectors !== undefined) && (vectors.length != 0)) {
             var result = vectors[0];
             for (var i = 1; i < vectors.length; ++i) {
                 result = sum(result, vectors[i]);
             }
             return result;
         } else {
-            throw Error('Empty vectors array.');
+            console.log('Empty vectors array in sum(vectors).');
+            return new PIXI.Point(0, 0);
         }
     }
 );
