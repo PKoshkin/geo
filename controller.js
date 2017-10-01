@@ -114,6 +114,7 @@ function Controller() {
                 additional_forces[i] = [];
             }
             for (var i = 0; i < model.units.length; ++i) {
+                // Обработка столкновений с другими юнитами
                 for (var j = 0; j < model.units.length; ++j) {
                     if (i >= j) {
                         continue;
@@ -142,9 +143,11 @@ function Controller() {
                         model.units[i].take_momentum(
                             get_multiplied(direction, delta_v1 * model.units[i].mass)
                         );
+                        model.units[i].move_back();
                         model.units[j].take_momentum(
                             get_multiplied(direction, delta_v2 * model.units[j].mass)
                         );
+                        model.units[j].move_back();
 
                         var overlapping = model.units[i].get_radius() + model.units[j].get_radius() - distance(model.units[i].get_position(), model.units[j].get_position());
                         additional_forces[i].push(get_multiplied(direction, -overlapping * model.units[i].mass));
@@ -152,12 +155,14 @@ function Controller() {
                     }
                 }
 
+                // Обработка столкновений с препятствиями
                 for (var j = 0; j < model.map.obstacles.length; ++j) {
                     var closest_point = get_closets_point(model.units[i].graphics, model.map.obstacles[j].graphics);
                     var radius = model.units[i].get_radius();
                     var current_distance = distance(closest_point, model.units[i].get_position());
                     if (current_distance < radius) {
                         model.units[i].take_momentum(get_reflecting_momentum(model.units[i], model.map.obstacles[j].graphics));
+                        model.units[i].move_back();
                         var direction = make_vector(closest_point, model.units[i].get_position());
                         normalize(direction);
                         additional_forces[i].push(get_multiplied(direction, (radius - current_distance) * model.units[i].mass));

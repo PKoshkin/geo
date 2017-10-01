@@ -76,9 +76,14 @@ function Unit(in_x, in_y, in_radius=50) {
             force = sum(force, additional_forces_sum);
         }
         var acceleration = get_multiplied(force, 1 / self.mass);
+        self.previous_position = self.get_position();
         self.velocity = sum(self.velocity, acceleration);
         self.graphics.position = sum(self.graphics.position, self.velocity);
     };
+
+    self.move_back = function() {
+        self.graphics.position = self.previous_position;
+    }
 
     self.get_momentum = function() {
         return get_multiplied(self.velocity, self.mass);
