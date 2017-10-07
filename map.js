@@ -1,18 +1,18 @@
-function Obstacle(path) {
-    var self = this;
-    self.color = 0x0000FF;
-
-    self.redraw = function() {
-        if (self.graphics !== undefined) {
-            self.graphics.destroy();
-        }
-        self.graphics = new PIXI.Graphics(); // Создаем новый графический элемент
-        self.graphics.beginFill(self.color, 1); // Задаем цвет заполнения
-        self.graphics.drawPolygon(path); // Рисуем прямоугольник
-        self.graphics.endFill(); // Закончили отрисовку
-    };
-    self.redraw();
+function Obstacle(in_path) {
+    this.in_path = in_path;
+    this.color = 0x0000FF;
+    this.redraw();
 }
+
+Obstacle.prototype.redraw = function() {
+    if (this.graphics !== undefined) {
+        this.graphics.destroy();
+    }
+    this.graphics = new PIXI.Graphics(); // Создаем новый графический элемент
+    this.graphics.beginFill(this.color, 1); // Задаем цвет заполнения
+    this.graphics.drawPolygon(this.in_path); // Рисуем прямоугольник
+    this.graphics.endFill(); // Закончили отрисовку
+};
 
 
 function Map() {
