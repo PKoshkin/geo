@@ -104,6 +104,22 @@ function Controller() {
                     model.active_units[i].stop();
                 }
             }
+            // Включает / выключает Unit.defense_mode
+            if ((event.key == 'h') || (event.key == 'H')) {
+                for (var i = 0; i < model.active_units.length; ++i) {
+                    if (model.active_units[i].defense_mode) {
+                        model.active_units[i].defense_mode = false;
+                    } else {
+                        model.active_units[i].defense_mode = true;
+                        if (model.active_units[i].direction_point === undefined) {
+                            model.active_units[i].direction_point = new PIXI.Point(
+                                model.active_units[i].get_position().x,
+                                model.active_units[i].get_position().y
+                            );
+                        }
+                    }
+                }
+            }
         });
 
         // Основной событийный цикл

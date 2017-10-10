@@ -13,6 +13,7 @@ function Unit(in_x, in_y, in_radius=50) {
     this.velocity = new PIXI.Point(0, 0); // Скорость
     this.direction_force_module = 0.5; // Модуль скорости в сторону точки назначения
     this.resistance_coefficient = 0.1; // Коэффициент сопротивления
+    this.defense_mode = false; // Пытается ли юнит вернуться к точке назначения, если его оттуда вытолкнули
 };
 
 
@@ -35,7 +36,7 @@ Unit.prototype.get_direction_force = function() {
         set_length(direction_force, this.direction_force_module);
         return direction_force;
     } else {
-        if (get_length(this.velocity) <= this.velocity_epsilon) {
+        if ((get_length(this.velocity) <= this.velocity_epsilon) && (!this.defense_mode)) {
             this.direction_point = undefined;
         }
         return new PIXI.Point(0, 0);
