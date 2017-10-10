@@ -27,11 +27,17 @@ Unit.prototype.get_radius = function() {
 
 
 Unit.prototype.get_direction_force = function() {
+    if (this.direction_point === undefined) {
+        return new PIXI.Point(0, 0);
+    }
     if (distance(this.get_position(), this.direction_point) > this.epsilon) {
         var direction_force = make_vector(this.get_position(), this.direction_point);
         set_length(direction_force, this.direction_force_module);
         return direction_force;
     } else {
+        if (get_length(this.velocity) <= this.velocity_epsilon) {
+            this.direction_point = undefined;
+        }
         return new PIXI.Point(0, 0);
     }
 }

@@ -85,8 +85,7 @@ function Controller() {
         // При нажатии ПКМ меняем направление движения Unit'ов из model.active_units
         application.view.oncontextmenu = function(event) {
             for (var i = 0; i < model.active_units.length; ++i) {
-                model.active_units[i].direction_point.x = event.clientX;
-                model.active_units[i].direction_point.y = event.clientY;
+                model.active_units[i].direction_point = new PIXI.Point(event.clientX, event.clientY);
             }
             return false;
         };
