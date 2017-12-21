@@ -7,7 +7,6 @@ class Application {
         PIXI.settings.RENDER_OPTIONS.backgroundColor = 0xFFFFFF;
         PIXI.settings.RENDER_OPTIONS.antialias = true;
         this.application = new PIXI.Application(width, height); // Создаем холст
-        document.body.appendChild(application.view); // Выводим его в тело страницы
+        document.body.appendChild(this.application.view); // Выводим его в тело страницы
     }
 }
-
